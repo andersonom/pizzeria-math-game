@@ -42,8 +42,13 @@ button:focus-visible, select:focus-visible, a:focus-visible {
 .brand small { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; }
 .topbar-actions { display: flex; align-items: center; gap: 14px; }
 .level-picker { display: grid; gap: 4px; color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
-.level-picker select, #language-select { padding: 9px 11px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background: var(--panel); font-size: 13px; font-weight: 700; text-transform: none; letter-spacing: 0; }
+.level-picker select { padding: 9px 11px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background: var(--panel); font-size: 13px; font-weight: 700; text-transform: none; letter-spacing: 0; }
 .level-picker select { width: 142px; }
+.language-picker { display: flex; gap: 3px; padding: 3px; border: 1px solid var(--line); border-radius: 11px; background: var(--panel); }
+.language-button { display: grid; place-items: center; width: 31px; height: 29px; padding: 0; border: 1px solid transparent; border-radius: 8px; background: transparent; font-size: 18px; line-height: 1; cursor: pointer; transition: background .14s, border-color .14s, transform .14s; }
+.language-button:hover { background: #f6f7f0; }
+.language-button:active { transform: scale(.94); }
+.language-button.is-active { border-color: #c6d9bb; background: #edf4e9; }
 .timer-card { display: grid; justify-items: center; min-width: 78px; padding: 7px 12px 8px; border: 1px solid #eadfae; border-radius: 12px; background: #fff8de; }
 .timer-caption { color: #938342; font-size: 9px; font-weight: 900; letter-spacing: .14em; }
 .timer-card strong { color: #564b24; font: 900 22px/1.15 'Nunito', sans-serif; font-variant-numeric: tabular-nums; }
@@ -164,7 +169,7 @@ button:focus-visible, select:focus-visible, a:focus-visible {
   .brand small { font-size: 10px; }
   .topbar-actions { flex-wrap: wrap; gap: 7px; }
   .level-picker select { width: 120px; }
-  .level-picker select, #language-select { padding: 8px 7px; font-size: 11px; }
+  .level-picker select { padding: 8px 7px; font-size: 11px; }
   .timer-card { min-width: 62px; padding: 6px 8px; }
   .timer-card strong { font-size: 19px; }
   .board-heading h2 { font-size: 17px; }

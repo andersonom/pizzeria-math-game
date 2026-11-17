@@ -20,11 +20,11 @@
           </span>
         </a>
         <div class="topbar-actions">
-          <select id="language-select" aria-label="Idioma" data-i18n-aria-label="language">
-            <option value="pt-BR" lang="pt-BR">Português</option>
-            <option value="en" lang="en">English</option>
-            <option value="fr" lang="fr">Français</option>
-          </select>
+          <div class="language-picker" aria-label="Idioma" data-i18n-aria-label="language">
+            <button type="button" class="language-button" data-language="pt-BR" aria-label="Português" title="Português">🇧🇷</button>
+            <button type="button" class="language-button" data-language="en" aria-label="English" title="English">🇬🇧</button>
+            <button type="button" class="language-button" data-language="fr" aria-label="Français" title="Français">🇫🇷</button>
+          </div>
           <label class="level-picker" for="level-select">
             <span data-i18n="level">Fase</span>
             <select id="level-select" aria-label="Escolher fase" data-i18n-aria-label="chooseLevel"></select>

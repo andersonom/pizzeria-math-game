@@ -24,7 +24,7 @@ const state = {
 };
 
 const dom = {
-  languageSelect: document.querySelector('#language-select'),
+  languagePicker: document.querySelector('.language-picker'),
   levelSelect: document.querySelector('#level-select'),
   timer: document.querySelector('#timer'),
   timerCard: document.querySelector('.timer-card'),
@@ -677,6 +677,11 @@ function connectControls() {
 }
 
 function refreshLanguage() {
+  document.querySelectorAll('[data-language]').forEach((button) => {
+    const selected = button.dataset.language === getLanguage();
+    button.classList.toggle('is-active', selected);
+    button.setAttribute('aria-pressed', String(selected));
+  });
   translatePage();
   populateLevelSelect();
   updatePhaseDetails();
@@ -687,9 +692,10 @@ function refreshLanguage() {
 }
 
 async function initialize() {
-  dom.languageSelect.value = getLanguage();
-  dom.languageSelect.addEventListener('change', () => {
-    setLanguage(dom.languageSelect.value);
+  dom.languagePicker.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-language]');
+    if (!button) return;
+    setLanguage(button.dataset.language);
     refreshLanguage();
   });
   refreshLanguage();
