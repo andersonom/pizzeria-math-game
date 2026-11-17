@@ -1,0 +1,58 @@
+{
+  "levels": [
+    {
+      "id": "fase-1",
+      "title": "A primeira pizzaria",
+      "description": "Organize os espaços e encontre lugar para todos os clientes.",
+      "grid": { "width": 15, "height": 15, "metersPerCell": 1 },
+      "timeLimitSeconds": 60,
+      "rooms": [
+        { "type": "kitchen", "label": "Cozinha", "count": 1, "areaM2": 45, "width": 9, "height": 5 },
+        { "type": "bathroom", "label": "Banheiros", "count": 2, "areaM2": 9 },
+        { "type": "entrance", "label": "Entrada", "count": 1, "areaM2": 20 }
+      ],
+      "tables": [
+        { "type": "table8", "label": "Mesa de 8", "seats": 8, "count": 8, "width": 1, "height": 2 },
+        { "type": "table4", "label": "Mesa de 4", "seats": 4, "count": 3, "width": 1, "height": 1 }
+      ],
+      "targetSeats": 76,
+      "minimumTableDistanceMeters": 2
+    },
+    {
+      "id": "fase-2",
+      "title": "Um espaço mais compacto",
+      "description": "Monte uma nova planta com menos banheiros e outra combinação de mesas.",
+      "grid": { "width": 15, "height": 15, "metersPerCell": 1 },
+      "timeLimitSeconds": 60,
+      "rooms": [
+        { "type": "kitchen", "label": "Cozinha", "count": 1, "areaM2": 45, "width": 9, "height": 5 },
+        { "type": "bathroom", "label": "Banheiro", "count": 1, "areaM2": 9 },
+        { "type": "entrance", "label": "Entrada", "count": 1, "areaM2": 20 }
+      ],
+      "tables": [
+        { "type": "table8", "label": "Mesa de 8", "seats": 8, "count": 5, "width": 1, "height": 2 },
+        { "type": "table4", "label": "Mesa de 4", "seats": 4, "count": 4, "width": 1, "height": 1 }
+      ],
+      "targetSeats": 56,
+      "minimumTableDistanceMeters": 2
+    },
+    {
+      "id": "fase-3",
+      "title": "Mais banheiros, mais desafios",
+      "description": "Distribua três banheiros sem perder espaço para as mesas.",
+      "grid": { "width": 15, "height": 15, "metersPerCell": 1 },
+      "timeLimitSeconds": 60,
+      "rooms": [
+        { "type": "kitchen", "label": "Cozinha", "count": 1, "areaM2": 45, "width": 9, "height": 5 },
+        { "type": "bathroom", "label": "Banheiros", "count": 3, "areaM2": 9 },
+        { "type": "entrance", "label": "Entrada", "count": 1, "areaM2": 20 }
+      ],
+      "tables": [
+        { "type": "table8", "label": "Mesa de 8", "seats": 8, "count": 6, "width": 1, "height": 2 },
+        { "type": "table4", "label": "Mesa de 4", "seats": 4, "count": 3, "width": 1, "height": 1 }
+      ],
+      "targetSeats": 60,
+      "minimumTableDistanceMeters": 2
+    }
+  ]
+}
