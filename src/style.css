@@ -42,7 +42,8 @@ button:focus-visible, select:focus-visible, a:focus-visible {
 .brand small { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; }
 .topbar-actions { display: flex; align-items: center; gap: 14px; }
 .level-picker { display: grid; gap: 4px; color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
-.level-picker select { min-width: 142px; padding: 9px 30px 9px 11px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background: var(--panel); font-size: 13px; font-weight: 700; text-transform: none; letter-spacing: 0; }
+.level-picker select, #language-select { padding: 9px 11px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background: var(--panel); font-size: 13px; font-weight: 700; text-transform: none; letter-spacing: 0; }
+.level-picker select { width: 142px; }
 .timer-card { display: grid; justify-items: center; min-width: 78px; padding: 7px 12px 8px; border: 1px solid #eadfae; border-radius: 12px; background: #fff8de; }
 .timer-caption { color: #938342; font-size: 9px; font-weight: 900; letter-spacing: .14em; }
 .timer-card strong { color: #564b24; font: 900 22px/1.15 'Nunito', sans-serif; font-variant-numeric: tabular-nums; }
@@ -51,6 +52,7 @@ button:focus-visible, select:focus-visible, a:focus-visible {
 @keyframes pulse { to { transform: scale(1.03); } }
 
 .game-layout { display: grid; grid-template-columns: minmax(194px, 220px) minmax(420px, 1fr) minmax(235px, 265px); align-items: start; gap: 17px; }
+.game-layout[hidden] { display: none; }
 .panel { padding: 18px 16px; border: 1px solid var(--line); border-radius: 18px; background: var(--panel); box-shadow: var(--shadow); }
 .panel-heading { margin-bottom: 18px; }
 .eyebrow { color: #84917b; font-size: 9px; font-weight: 900; letter-spacing: .15em; }
@@ -71,7 +73,7 @@ button:focus-visible, select:focus-visible, a:focus-visible {
 .swatch-table8 { border-radius: 5px; }
 .swatch-table4 { border-radius: 50%; }
 .small-action { display: flex; align-items: center; gap: 7px; margin: 4px 0 0 31px; padding: 6px 9px; border: 1px solid #e8e2cc; border-radius: 8px; color: #756331; background: #fff8df; font-size: 11px; font-weight: 800; cursor: pointer; }
-.small-action span { font-size: 16px; line-height: .8; }
+.small-action span[aria-hidden="true"] { font-size: 16px; line-height: .8; }
 .small-action[hidden] { display: none; }
 .tool-group-bottom { padding-bottom: 5px; }
 .edit-tools { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
@@ -156,12 +158,13 @@ button:focus-visible, select:focus-visible, a:focus-visible {
 
 @media (max-width: 560px) {
   .app-shell { padding: 12px 10px; }
-  .topbar { margin-bottom: 10px; }
+  .topbar { flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
   .brand-mark { width: 40px; height: 40px; border-radius: 13px; font-size: 23px; }
   .brand strong { font-size: 16px; }
   .brand small { font-size: 10px; }
-  .topbar-actions { gap: 7px; }
-  .level-picker select { min-width: 104px; max-width: 120px; padding: 8px 22px 8px 7px; font-size: 11px; }
+  .topbar-actions { flex-wrap: wrap; gap: 7px; }
+  .level-picker select { width: 120px; }
+  .level-picker select, #language-select { padding: 8px 7px; font-size: 11px; }
   .timer-card { min-width: 62px; padding: 6px 8px; }
   .timer-card strong { font-size: 19px; }
   .board-heading h2 { font-size: 17px; }

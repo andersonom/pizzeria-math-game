@@ -1,3 +1,5 @@
+import { getLanguage, setLanguage, t, translatePage } from './i18n.js';
+
 const LEVELS_URL = new URL('../data/levels.json', import.meta.url);
 const CANVAS_SIZE = 720;
 const CELL_SIZE = 42;
@@ -8,6 +10,7 @@ const state = {
   levels: [],
   levelIndex: 0,
   mode: 'loading',
+  loadError: null,
   remainingMs: 60_000,
   activeTool: 'move',
   rotatedLargeTable: false,
@@ -21,6 +24,7 @@ const state = {
 };
 
 const dom = {
+  languageSelect: document.querySelector('#language-select'),
   levelSelect: document.querySelector('#level-select'),
   timer: document.querySelector('#timer'),
   timerCard: document.querySelector('.timer-card'),
@@ -45,18 +49,12 @@ const dom = {
 };
 
 const roomColors = {
-  kitchen: { fill: 0xf2c7a6, line: 0xb47d53, label: 'COZINHA', icon: '🍕' },
-  bathroom: { fill: 0xb9dce1, line: 0x5b9aa4, label: 'BANHEIRO', icon: '◉' },
-  entrance: { fill: 0xd8c8ed, line: 0x8a73ac, label: 'ENTRADA', icon: '↗' }
+  kitchen: { fill: 0xf2c7a6, line: 0xb47d53, icon: '🍕' },
+  bathroom: { fill: 0xb9dce1, line: 0x5b9aa4, icon: '◉' },
+  entrance: { fill: 0xd8c8ed, line: 0x8a73ac, icon: '↗' }
 };
 
-const roomToolCopy = {
-  kitchen: 'Arraste na planta para desenhar a cozinha.',
-  bathroom: 'Arraste para desenhar um banheiro de 9 m².',
-  entrance: 'Arraste para desenhar a entrada de 20 m².'
-};
-
-class RestaurantScene extends Phaser.Scene {
+class RestaurantScene extends (window.Phaser?.Scene ?? Object) {
   constructor() {
     super('RestaurantScene');
     this.graphics = null;
@@ -220,7 +218,7 @@ class RestaurantScene extends Phaser.Scene {
     const h = room.height * CELL_SIZE - 4;
     this.graphics.fillStyle(style.fill, .92).fillRoundedRect(x, y, w, h, 5);
     this.graphics.lineStyle(2, style.line, .95).strokeRoundedRect(x, y, w, h, 5);
-    const text = room.width * room.height <= 4 ? style.icon : style.label;
+    const text = room.width * room.height <= 4 ? style.icon : t(room.type).toLocaleUpperCase(getLanguage());
     const fontSize = Math.max(8, Math.min(11, Math.floor(Math.min(w, h) / (text.length > 3 ? 5.5 : 2.2))));
     this.addLabel(text, x + w / 2, y + h / 2, fontSize, '#473f36', Math.max(18, w - 5));
   }
@@ -367,18 +365,12 @@ function updateToolUI() {
     button.setAttribute('aria-pressed', String(active));
   });
   dom.rotateButton.hidden = state.activeTool !== 'table8';
-  if (state.activeTool === 'table8') {
-    dom.rotateButton.innerHTML = `<span aria-hidden="true">↻</span> ${state.rotatedLargeTable ? 'Mesa na horizontal' : 'Girar mesa de 8'}`;
-    dom.toolHint.textContent = 'Clique na planta para colocar a mesa. Você pode girá-la antes de posicionar.';
-  } else if (state.activeTool === 'table4') {
-    dom.toolHint.textContent = 'Clique na sala de jantar para colocar uma mesa de 4 lugares.';
-  } else if (roomToolCopy[state.activeTool]) {
-    dom.toolHint.textContent = roomToolCopy[state.activeTool];
-  } else if (state.activeTool === 'erase') {
-    dom.toolHint.textContent = 'Clique em uma peça para removê-la.';
-  } else {
-    dom.toolHint.textContent = 'Arraste uma peça para reposicioná-la. Você pode mover ou remover até o tempo acabar.';
-  }
+  document.querySelector('#rotate-label').textContent = t(state.rotatedLargeTable ? 'horizontal' : 'rotate');
+  dom.toolHint.textContent = t(`${state.activeTool}Hint`);
+}
+
+function levelText(level, field) {
+  return level.translations?.[getLanguage()]?.[field] ?? level[field];
 }
 
 function populateLevelSelect() {
@@ -386,9 +378,10 @@ function populateLevelSelect() {
   state.levels.forEach((level, index) => {
     const option = document.createElement('option');
     option.value = String(index);
-    option.textContent = `Fase ${index + 1} · ${level.title}`;
+    option.textContent = `${t('level')} ${index + 1} · ${levelText(level, 'title')}`;
     dom.levelSelect.append(option);
   });
+  dom.levelSelect.value = String(state.levelIndex);
 }
 
 function selectLevel(index) {
@@ -415,11 +408,14 @@ function updatePhaseDetails() {
   const level = currentLevel();
   if (!level) return;
   const stageNumber = state.levelIndex + 1;
-  dom.phaseKicker.textContent = `FASE ${stageNumber}`;
-  dom.phaseTitle.textContent = level.title;
-  dom.missionTitle.textContent = level.title;
-  dom.missionDescription.textContent = level.description;
-  dom.boardSizeLabel.textContent = `${level.grid.width} × ${level.grid.height} m · cada quadrado vale 1 m²`;
+  dom.phaseKicker.textContent = `${t('level').toLocaleUpperCase(getLanguage())} ${stageNumber}`;
+  dom.phaseTitle.textContent = levelText(level, 'title');
+  dom.missionTitle.textContent = levelText(level, 'title');
+  dom.missionDescription.textContent = levelText(level, 'description');
+  dom.boardSizeLabel.textContent = t('gridSize', level.grid);
+  document.querySelector('#game').setAttribute('aria-label', t('gridLabel', level.grid));
+  document.querySelector('#start-description').textContent = t('startDescription', { seconds: level.timeLimitSeconds });
+  document.querySelector('#spacing-note').textContent = t('spacingNote', { distance: level.minimumTableDistanceMeters });
   dom.roomRules.replaceChildren();
   level.rooms.forEach((room) => {
     const item = document.createElement('li');
@@ -428,13 +424,12 @@ function updatePhaseDetails() {
     icon.textContent = roomColors[room.type]?.icon ?? '▦';
     const text = document.createElement('span');
     const strong = document.createElement('strong');
-    strong.textContent = room.type === 'bathroom'
-      ? `${room.count} ${room.count === 1 ? 'banheiro' : 'banheiros'}`
-      : `${room.count} ${room.label.toLowerCase()}`;
+    const roomName = room.type === 'bathroom' && room.count > 1 ? 'bathrooms' : room.type;
+    strong.textContent = t('pieceCount', { count: room.count, label: roomColors[room.type] ? t(roomName) : room.label });
     const small = document.createElement('small');
     if (room.type === 'kitchen') small.textContent = `${room.width} × ${room.height} m`;
-    else if (room.type === 'bathroom') small.textContent = `${room.areaM2} m² cada · retângulo livre`;
-    else small.textContent = `${room.areaM2} m² · vestiário e caixa inclusos`;
+    else if (roomColors[room.type]) small.textContent = t(`${room.type}Size`, { area: room.areaM2 });
+    else small.textContent = `${room.areaM2} m²`;
     text.append(strong, small);
     item.append(icon, text);
     dom.roomRules.append(item);
@@ -448,15 +443,15 @@ function updatePhaseDetails() {
     icon.textContent = table.seats === 8 ? '▰' : '●';
     const text = document.createElement('span');
     const strong = document.createElement('strong');
-    strong.textContent = `${table.count} ${table.label.toLowerCase()}`;
+    strong.textContent = t('pieceCount', { count: table.count, label: ['table8', 'table4'].includes(table.type) ? t(table.type) : table.label });
     const small = document.createElement('small');
     const footprint = table.width * table.height;
-    small.textContent = `${table.seats} lugares cada · ${footprint} ${footprint === 1 ? 'm²' : 'm²'}`;
+    small.textContent = t('tableSize', { seats: table.seats, area: footprint });
     text.append(strong, small);
     item.append(icon, text);
     dom.tableRules.append(item);
   });
-  dom.seatTarget.textContent = `${level.targetSeats} lugares`;
+  dom.seatTarget.textContent = t('seats', { count: level.targetSeats });
   dom.nextButton.hidden = state.levelIndex >= state.levels.length - 1;
 }
 
@@ -535,49 +530,50 @@ function validateCurrentLevel() {
   const tablesInRooms = state.tables.some((table) => state.rooms.some((room) => rectanglesOverlap(table, room)));
   const tablesBoundsPass = state.tables.every((table) => rectInsideBoard(table, grid));
   const tablesInsidePass = tablesBoundsPass && !tablesOverlap && !tablesInRooms;
-  const spacingPass = tableSpacingPass(state.tables, level.minimumTableDistanceMeters, grid.metersPerCell);
+  const distance = level.minimumTableDistanceMeters;
+  const spacingPass = tableSpacingPass(state.tables, distance, grid.metersPerCell);
   const tablesPass = tableCountsPass && seatTotalPass && tableGeometryPass;
   const placementPass = state.tables.length > 0 && tablesInsidePass && spacingPass;
   const placementIssues = [];
-  if (state.tables.length === 0) placementIssues.push('nenhuma mesa foi colocada');
-  if (!tablesBoundsPass) placementIssues.push('há mesas fora da planta');
-  if (tablesOverlap) placementIssues.push('há mesas sobrepostas');
-  if (tablesInRooms) placementIssues.push('há mesas dentro de outros cômodos');
-  if (!spacingPass) placementIssues.push(`a distância mínima de ${level.minimumTableDistanceMeters} m entre mesas não foi respeitada`);
+  if (state.tables.length === 0) placementIssues.push(t('noTables'));
+  if (!tablesBoundsPass) placementIssues.push(t('outsideTables'));
+  if (tablesOverlap) placementIssues.push(t('overlappingTables'));
+  if (tablesInRooms) placementIssues.push(t('tablesInsideRooms'));
+  if (!spacingPass) placementIssues.push(t('spacingFailed', { distance }));
 
   return {
     stars: Number(roomsPass) + Number(tablesPass) + Number(placementPass),
     checks: [
       {
         pass: roomsPass,
-        title: 'Cômodos e áreas',
+        title: t('roomsAndAreas'),
         detail: roomsPass
-          ? `Cozinha, banheiros e entrada corretos; ${actualDiningArea} m² para a sala de jantar.`
-          : `Sala de jantar calculada: ${actualDiningArea} m²; esperada: ${expectedDiningArea} m². Confira quantidades, dimensões e sobreposições.`
+          ? t('roomsPassed', { actual: actualDiningArea })
+          : t('roomsFailed', { actual: actualDiningArea, expected: expectedDiningArea })
       },
       {
         pass: tablesPass,
-        title: 'Mesas e lugares',
+        title: t('tablesAndSeats'),
         detail: tablesPass
-          ? `${actualSeats} lugares e quantidades de mesas corretos.`
-          : `${actualSeats} de ${level.targetSeats} lugares; confira também a quantidade de cada tipo de mesa.`
+          ? t('tablesPassed', { actual: actualSeats })
+          : t('tablesFailed', { actual: actualSeats, expected: level.targetSeats })
       },
       {
         pass: placementPass,
-        title: 'Distribuição das mesas',
+        title: t('placement'),
         detail: placementPass
-          ? `Todas as mesas estão na sala de jantar e mantêm pelo menos ${level.minimumTableDistanceMeters} m entre bordas.`
-          : `Confira: ${placementIssues.join('; ')}.`
+          ? t('placementPassed', { distance })
+          : placementIssues.join(' ')
       }
     ]
   };
 }
 
 function showResult(result) {
-  dom.resultTitle.textContent = result.stars === 3 ? 'Pizzaria pronta!' : result.stars > 0 ? 'Bom começo!' : 'Vamos tentar de novo?';
+  dom.resultTitle.textContent = result.stars === 3 ? t('allStars') : result.stars > 0 ? t('someStars') : t('zeroStars');
   dom.resultSummary.textContent = result.stars === 3
-    ? 'Você cumpriu todas as regras da fase.'
-    : 'Confira os itens abaixo e tente outra disposição.';
+    ? t('success')
+    : t('tryAnotherLayout');
   dom.stars.replaceChildren();
   for (let index = 0; index < 3; index++) {
     const star = document.createElement('span');
@@ -585,7 +581,7 @@ function showResult(result) {
     if (index >= result.stars) star.className = 'empty-star';
     dom.stars.append(star);
   }
-  dom.stars.setAttribute('aria-label', `${result.stars} de 3 estrelas`);
+  dom.stars.setAttribute('aria-label', t('stars', { count: result.stars }));
   dom.resultChecklist.replaceChildren();
   result.checks.forEach((check) => {
     const item = document.createElement('li');
@@ -657,6 +653,7 @@ function renderGameToText() {
   if (!level) return JSON.stringify({ mode: state.mode });
   return JSON.stringify({
     mode: state.mode,
+    language: getLanguage(),
     coordinateSystem: 'Cells are zero-based; x increases right, y increases down; room/table sizes are in 1m cells.',
     level: level.id,
     timerSeconds: Math.ceil(state.remainingMs / 1000),
@@ -679,13 +676,29 @@ function connectControls() {
   dom.levelSelect.addEventListener('change', (event) => selectLevel(event.target.value));
 }
 
+function refreshLanguage() {
+  translatePage();
+  populateLevelSelect();
+  updatePhaseDetails();
+  updateToolUI();
+  if (state.mode === 'result') showResult(validateCurrentLevel());
+  if (state.loadError) dom.loadError.textContent = t(state.loadError);
+  state.scene?.redraw();
+}
+
 async function initialize() {
+  dom.languageSelect.value = getLanguage();
+  dom.languageSelect.addEventListener('change', () => {
+    setLanguage(dom.languageSelect.value);
+    refreshLanguage();
+  });
+  refreshLanguage();
   try {
-    if (!window.Phaser) throw new Error('Não foi possível carregar Phaser. Confira a conexão com a internet e recarregue a página.');
+    if (!window.Phaser) throw new Error('phaserError');
     const response = await fetch(LEVELS_URL);
-    if (!response.ok) throw new Error('Não foi possível carregar as fases. Abra o projeto por um servidor local, como o Live Server do VS Code.');
+    if (!response.ok) throw new Error('levelError');
     const data = await response.json();
-    if (!Array.isArray(data.levels) || data.levels.length === 0) throw new Error('O arquivo JSON não contém fases válidas.');
+    if (!Array.isArray(data.levels) || data.levels.length === 0) throw new Error('invalidLevels');
     state.levels = data.levels;
     populateLevelSelect();
     connectControls();
@@ -706,9 +719,10 @@ async function initialize() {
     });
     selectLevel(0);
   } catch (error) {
-    dom.loadError.textContent = error.message || 'O jogo não conseguiu carregar.';
+    state.loadError = ['phaserError', 'invalidLevels'].includes(error.message) ? error.message : 'levelError';
+    dom.loadError.textContent = t(state.loadError);
     dom.loadError.hidden = false;
-    document.querySelector('.app-shell').hidden = true;
+    document.querySelector('.game-layout').hidden = true;
   }
 }
 

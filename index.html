@@ -12,71 +12,76 @@
   <body>
     <div class="app-shell">
       <header class="topbar">
-        <a class="brand" href="#" aria-label="De Pizza — início">
+        <a class="brand" href="#" aria-label="De Pizza — início" data-i18n-aria-label="home">
           <span class="brand-mark" aria-hidden="true">🍕</span>
           <span>
             <strong>De Pizza</strong>
-            <small>Desafio da planta</small>
+            <small data-i18n="subtitle">Desafio da planta</small>
           </span>
         </a>
         <div class="topbar-actions">
+          <select id="language-select" aria-label="Idioma" data-i18n-aria-label="language">
+            <option value="pt-BR" lang="pt-BR">Português</option>
+            <option value="en" lang="en">English</option>
+            <option value="fr" lang="fr">Français</option>
+          </select>
           <label class="level-picker" for="level-select">
-            <span>Fase</span>
-            <select id="level-select" aria-label="Escolher fase"></select>
+            <span data-i18n="level">Fase</span>
+            <select id="level-select" aria-label="Escolher fase" data-i18n-aria-label="chooseLevel"></select>
           </label>
           <div class="timer-card" aria-live="polite">
-            <span class="timer-caption">TEMPO</span>
+            <span class="timer-caption" data-i18n="time">TEMPO</span>
             <strong id="timer">01:00</strong>
           </div>
         </div>
       </header>
 
       <main class="game-layout">
-        <aside class="panel tools-panel" aria-label="Ferramentas de construção">
+        <aside class="panel tools-panel" aria-label="Ferramentas de construção" data-i18n-aria-label="tools">
           <div class="panel-heading">
-            <span class="eyebrow">CONSTRUIR</span>
-            <h1>Monte a pizzaria</h1>
+            <span class="eyebrow" data-i18n="build">CONSTRUIR</span>
+            <h1 data-i18n="buildTitle">Monte a pizzaria</h1>
           </div>
 
           <div class="tool-group">
-            <p class="tool-group-title">Cômodos</p>
+            <p class="tool-group-title" data-i18n="rooms">Cômodos</p>
             <button class="tool-button" data-tool="kitchen" type="button">
               <span class="tool-swatch swatch-kitchen"></span>
-              <span><b>Cozinha</b><small>desenhar retângulo</small></span>
+              <span><b data-i18n="kitchen">Cozinha</b><small data-i18n="draw">desenhar retângulo</small></span>
             </button>
             <button class="tool-button" data-tool="bathroom" type="button">
               <span class="tool-swatch swatch-bathroom"></span>
-              <span><b>Banheiro</b><small>desenhar retângulo</small></span>
+              <span><b data-i18n="bathroom">Banheiro</b><small data-i18n="draw">desenhar retângulo</small></span>
             </button>
             <button class="tool-button" data-tool="entrance" type="button">
               <span class="tool-swatch swatch-entrance"></span>
-              <span><b>Entrada</b><small>inclui vestiário e caixa</small></span>
+              <span><b data-i18n="entrance">Entrada</b><small data-i18n="entranceTool">inclui vestiário e caixa</small></span>
             </button>
           </div>
 
           <div class="tool-group">
-            <p class="tool-group-title">Mesas</p>
+            <p class="tool-group-title" data-i18n="tables">Mesas</p>
             <button class="tool-button" data-tool="table8" type="button">
               <span class="tool-swatch swatch-table8"></span>
-              <span><b>Mesa de 8</b><small>1 × 2 m</small></span>
+              <span><b data-i18n="table8">Mesa de 8</b><small>1 × 2 m</small></span>
             </button>
             <button class="tool-button" data-tool="table4" type="button">
               <span class="tool-swatch swatch-table4"></span>
-              <span><b>Mesa de 4</b><small>1 m²</small></span>
+              <span><b data-i18n="table4">Mesa de 4</b><small>1 m²</small></span>
             </button>
             <button id="rotate-button" class="small-action" type="button" hidden>
-              <span aria-hidden="true">↻</span> Girar mesa de 8
+              <span aria-hidden="true">↻</span> <span id="rotate-label">Girar mesa de 8</span>
             </button>
           </div>
 
           <div class="tool-group tool-group-bottom">
-            <p class="tool-group-title">Editar</p>
+            <p class="tool-group-title" data-i18n="edit">Editar</p>
             <div class="edit-tools">
               <button class="tool-button compact is-active" data-tool="move" type="button" aria-pressed="true">
-                <span aria-hidden="true">✥</span><b>Mover</b>
+                <span aria-hidden="true">✥</span><b data-i18n="move">Mover</b>
               </button>
               <button class="tool-button compact" data-tool="erase" type="button" aria-pressed="false">
-                <span aria-hidden="true">⌫</span><b>Remover</b>
+                <span aria-hidden="true">⌫</span><b data-i18n="erase">Remover</b>
               </button>
             </div>
           </div>
@@ -84,70 +89,70 @@
           <p id="tool-hint" class="tool-hint">Escolha uma peça para começar. Você pode corrigir a planta até o tempo acabar.</p>
         </aside>
 
-        <section class="board-column" aria-label="Tabuleiro da pizzaria">
+        <section class="board-column" aria-label="Tabuleiro da pizzaria" data-i18n-aria-label="board">
           <div class="board-heading">
             <div>
               <span id="phase-kicker" class="eyebrow">FASE 1</span>
-              <h2 id="phase-title">Carregando fase…</h2>
+              <h2 id="phase-title" data-i18n="loading">Carregando fase…</h2>
             </div>
-            <button id="restart-button" class="icon-button" type="button" title="Reiniciar fase" aria-label="Reiniciar fase">↻</button>
+            <button id="restart-button" class="icon-button" type="button" title="Reiniciar fase" data-i18n-title="restart" aria-label="Reiniciar fase" data-i18n-aria-label="restart">↻</button>
           </div>
           <div class="board-stage">
             <div id="game" role="img" aria-label="Planta quadriculada de 15 por 15 metros"></div>
             <div id="start-overlay" class="board-overlay">
               <div class="overlay-card">
                 <span class="overlay-emoji" aria-hidden="true">🍕</span>
-                <p class="eyebrow">DESAFIO PRONTO</p>
-                <h2>Prepare o restaurante</h2>
-                <p>Desenhe os cômodos e coloque as mesas. Você tem 60 segundos.</p>
-                <button id="start-button" class="primary-button" type="button">Começar fase</button>
+                <p class="eyebrow" data-i18n="ready">DESAFIO PRONTO</p>
+                <h2 data-i18n="prepare">Prepare o restaurante</h2>
+                <p id="start-description">Desenhe os cômodos e coloque as mesas. Você tem 60 segundos.</p>
+                <button id="start-button" class="primary-button" type="button" data-i18n="start">Começar fase</button>
               </div>
             </div>
             <div id="result-overlay" class="board-overlay" hidden>
               <div class="overlay-card result-card">
-                <p class="eyebrow">FASE CONCLUÍDA</p>
-                <h2 id="result-title">Resultado</h2>
+                <p class="eyebrow" data-i18n="complete">FASE CONCLUÍDA</p>
+                <h2 id="result-title" data-i18n="result">Resultado</h2>
                 <div id="stars" class="stars" aria-label="Estrelas recebidas"></div>
                 <p id="result-summary" class="result-summary"></p>
                 <ul id="result-checklist" class="result-checklist"></ul>
                 <div class="result-actions">
-                  <button id="retry-button" class="secondary-button" type="button">Tentar de novo</button>
-                  <button id="next-button" class="primary-button" type="button">Próxima fase</button>
+                  <button id="retry-button" class="secondary-button" type="button" data-i18n="retry">Tentar de novo</button>
+                  <button id="next-button" class="primary-button" type="button" data-i18n="next">Próxima fase</button>
                 </div>
               </div>
             </div>
           </div>
           <div class="board-footer">
-            <span><i class="legend-dot legend-dining"></i> Área livre = sala de jantar</span>
+            <span><i class="legend-dot legend-dining"></i> <span data-i18n="diningLegend">Área livre = sala de jantar</span></span>
             <span id="board-size-label">15 × 15 m · cada quadrado vale 1 m²</span>
           </div>
         </section>
 
         <aside class="panel brief-panel" aria-label="Regras da fase">
           <div class="panel-heading brief-heading">
-            <span class="eyebrow">MISSÃO</span>
-            <h2 id="mission-title">Regras da fase</h2>
+            <span class="eyebrow" data-i18n="mission">MISSÃO</span>
+            <h2 id="mission-title" data-i18n="rules">Regras da fase</h2>
           </div>
           <p id="mission-description" class="mission-description"></p>
           <div class="rule-section">
-            <p class="tool-group-title">Cômodos necessários</p>
+            <p class="tool-group-title" data-i18n="requiredRooms">Cômodos necessários</p>
             <ul id="room-rules" class="rule-list"></ul>
           </div>
           <div class="rule-section">
-            <p class="tool-group-title">Mesas e lugares</p>
+            <p class="tool-group-title" data-i18n="tablesAndSeats">Mesas e lugares</p>
             <ul id="table-rules" class="rule-list"></ul>
-            <div class="seat-total"><span>Lugares no total</span><strong id="seat-target">—</strong></div>
+            <div class="seat-total"><span data-i18n="totalSeats">Lugares no total</span><strong id="seat-target">—</strong></div>
           </div>
           <div class="rule-note">
             <span class="note-icon" aria-hidden="true">ⓘ</span>
-            <p>Mantenha 2 m entre as mesas. Elas podem encostar nas paredes. As regras serão conferidas ao fim do tempo.</p>
+            <p id="spacing-note">Mantenha 2 m entre as mesas. Elas podem encostar nas paredes. As regras serão conferidas ao fim do tempo.</p>
           </div>
         </aside>
       </main>
 
       <footer class="page-footer">
-        <span>Arraste para desenhar cômodos · Escolha uma mesa e clique para posicioná-la</span>
-        <span>Até 3 estrelas por fase</span>
+        <span data-i18n="footerHelp">Arraste para desenhar cômodos · Escolha uma mesa e clique para posicioná-la</span>
+        <span data-i18n="footerStars">Até 3 estrelas por fase</span>
       </footer>
     </div>
     <div id="load-error" class="load-error" hidden></div>
