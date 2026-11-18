@@ -70,7 +70,7 @@ button:focus-visible, select:focus-visible, a:focus-visible {
 .tool-button.is-active { border-color: #c6d9bb; background: #edf4e9; }
 .tool-button b { display: block; font-size: 12px; font-weight: 800; }
 .tool-button small { display: block; margin-top: 2px; color: var(--muted); font-size: 10px; }
-.tool-swatch { flex: 0 0 22px; width: 22px; height: 22px; border: 1px solid rgba(38, 48, 38, .12); border-radius: 7px; }
+.tool-swatch { flex: 0 0 22px; width: 22px; height: 22px; display: grid; place-items: center; border: 1px solid rgba(38, 48, 38, .12); border-radius: 7px; color: #473f36; font-size: 12px; font-weight: 800; line-height: 1; }
 .swatch-kitchen { background: #f2c7a6; }
 .swatch-bathroom { background: #b9dce1; }
 .swatch-entrance { background: #d8c8ed; }
@@ -85,6 +85,13 @@ button:focus-visible, select:focus-visible, a:focus-visible {
 .tool-button.compact { justify-content: center; gap: 6px; min-height: 38px; padding: 6px; border: 1px solid var(--line); }
 .tool-button.compact > span { font-size: 14px; color: #697767; }
 .tool-button.compact b { font-size: 10px; }
+.measurement-toggle { display: flex; align-items: center; gap: 8px; margin: 12px 2px 0; color: var(--muted); font-size: 10px; line-height: 1.35; cursor: pointer; }
+.measurement-toggle input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.toggle-track { position: relative; flex: 0 0 34px; width: 34px; height: 20px; border-radius: 999px; background: #d7dcd3; transition: background .16s; }
+.toggle-thumb { position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(38, 48, 38, .25); transition: transform .16s; }
+.measurement-toggle input:checked + .toggle-track { background: var(--green); }
+.measurement-toggle input:checked + .toggle-track .toggle-thumb { transform: translateX(14px); }
+.measurement-toggle input:focus-visible + .toggle-track { outline: 3px solid #8aaf71; outline-offset: 2px; }
 .tool-hint { min-height: 34px; margin: 8px 2px 0; color: var(--muted); font-size: 10px; line-height: 1.45; }
 
 .board-column { min-width: 0; }

@@ -4,6 +4,7 @@ const storageKey = 'pizzeria-language';
 // Each row uses the language order above: Portuguese, English, French.
 const messages = {
   "subtitle": ["Desafio da planta", "Floor Plan Challenge", "Défi du plan"],
+  "showArea": ["Mostrar área em m²", "Show area in m²", "Afficher la superficie en m²"],
   "build": ["CONSTRUIR", "BUILD", "CONSTRUIRE"],
   "buildTitle": ["Monte a pizzaria", "Design your pizzeria", "Aménagez la pizzeria"],
   "rooms": ["Cômodos", "Rooms", "Pièces"],

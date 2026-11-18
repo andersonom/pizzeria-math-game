@@ -46,15 +46,15 @@
           <div class="tool-group">
             <p class="tool-group-title" data-i18n="rooms">Cômodos</p>
             <button class="tool-button" data-tool="kitchen" type="button">
-              <span class="tool-swatch swatch-kitchen"></span>
+              <span class="tool-swatch swatch-kitchen" aria-hidden="true">🍕</span>
               <span><b data-i18n="kitchen">Cozinha</b><small data-i18n="draw">desenhar retângulo</small></span>
             </button>
             <button class="tool-button" data-tool="bathroom" type="button">
-              <span class="tool-swatch swatch-bathroom"></span>
+              <span class="tool-swatch swatch-bathroom" aria-hidden="true">◉</span>
               <span><b data-i18n="bathroom">Banheiro</b><small data-i18n="draw">desenhar retângulo</small></span>
             </button>
             <button class="tool-button" data-tool="entrance" type="button">
-              <span class="tool-swatch swatch-entrance"></span>
+              <span class="tool-swatch swatch-entrance" aria-hidden="true">↗</span>
               <span><b data-i18n="entrance">Entrada</b><small data-i18n="entranceTool">inclui vestiário e caixa</small></span>
             </button>
           </div>
@@ -84,6 +84,11 @@
                 <span aria-hidden="true">⌫</span><b data-i18n="erase">Remover</b>
               </button>
             </div>
+            <label class="measurement-toggle">
+              <input id="measurement-toggle" type="checkbox" checked />
+              <span class="toggle-track" aria-hidden="true"><span class="toggle-thumb"></span></span>
+              <span data-i18n="showArea">Mostrar área em m²</span>
+            </label>
           </div>
 
           <p id="tool-hint" class="tool-hint">Escolha uma peça para começar. Você pode corrigir a planta até o tempo acabar.</p>

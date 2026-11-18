@@ -10,6 +10,7 @@
       },
       "grid": { "width": 15, "height": 15, "metersPerCell": 1 },
       "timeLimitSeconds": 60,
+      "showArea": true,
       "rooms": [
         { "type": "kitchen", "label": "Cozinha", "count": 1, "areaM2": 45, "width": 9, "height": 5 },
         { "type": "bathroom", "label": "Banheiros", "count": 2, "areaM2": 9 },
@@ -32,6 +33,7 @@
       },
       "grid": { "width": 15, "height": 15, "metersPerCell": 1 },
       "timeLimitSeconds": 60,
+      "showArea": true,
       "rooms": [
         { "type": "kitchen", "label": "Cozinha", "count": 1, "areaM2": 45, "width": 9, "height": 5 },
         { "type": "bathroom", "label": "Banheiro", "count": 1, "areaM2": 9 },
@@ -54,6 +56,7 @@
       },
       "grid": { "width": 15, "height": 15, "metersPerCell": 1 },
       "timeLimitSeconds": 60,
+      "showArea": true,
       "rooms": [
         { "type": "kitchen", "label": "Cozinha", "count": 1, "areaM2": 45, "width": 9, "height": 5 },
         { "type": "bathroom", "label": "Banheiros", "count": 3, "areaM2": 9 },

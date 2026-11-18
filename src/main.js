@@ -25,6 +25,7 @@ const state = {
 
 const dom = {
   languagePicker: document.querySelector('.language-picker'),
+  measurementToggle: document.querySelector('#measurement-toggle'),
   levelSelect: document.querySelector('#level-select'),
   timer: document.querySelector('#timer'),
   timerCard: document.querySelector('.timer-card'),
@@ -243,7 +244,9 @@ class RestaurantScene extends (window.Phaser?.Scene ?? Object) {
     this.graphics.fillStyle(style.fill, .58).fillRect(x, y, w, h);
     this.graphics.lineStyle(2, style.line, 1).strokeRect(x, y, w, h);
     const area = rect.width * rect.height;
-    const measure = `${rect.width} × ${rect.height} m\n${area} m²`;
+    const measure = state.showArea
+      ? `${rect.width} × ${rect.height} m\n${area} m²`
+      : `${rect.width} × ${rect.height} m`;
     this.addLabel(measure, x + w / 2, y + h / 2, Math.max(9, Math.min(13, CELL_SIZE / 3)), '#3b4538', Math.max(26, w - 4));
   }
 
@@ -395,6 +398,8 @@ function selectLevel(index) {
   state.drawing = null;
   state.moving = null;
   state.hoverCell = null;
+  state.showArea = currentLevel()?.showArea ?? true;
+  dom.measurementToggle.checked = state.showArea;
   dom.startOverlay.hidden = false;
   dom.resultOverlay.hidden = true;
   dom.levelSelect.value = String(index);
@@ -658,6 +663,10 @@ function connectControls() {
   document.querySelector('#retry-button').addEventListener('click', resetLevel);
   dom.nextButton.addEventListener('click', () => selectLevel((state.levelIndex + 1) % state.levels.length));
   dom.levelSelect.addEventListener('change', (event) => selectLevel(event.target.value));
+  dom.measurementToggle.addEventListener('change', () => {
+    state.showArea = dom.measurementToggle.checked;
+    state.scene?.redraw();
+  });
 }
 
 function refreshLanguage() {
