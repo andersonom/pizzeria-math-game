@@ -9,6 +9,9 @@ Thumbs.db
 # Dependencies
 node_modules/
 
+# Full source art pack; only selected game assets belong in tiles/
+alltiles/
+
 # Local secrets and logs
 .env
 .env.*

@@ -61,11 +61,37 @@ class RestaurantScene extends (window.Phaser?.Scene ?? Object) {
     super('RestaurantScene');
     this.graphics = null;
     this.labels = [];
+    this.furniture = new Map();
+    this.visibleFurniture = new Set();
+    this.floors = new Map();
+    this.visibleFloors = new Set();
+    this.tableSprites = new Map();
+    this.visibleTables = new Set();
+  }
+
+  preload() {
+    const base = new URL('../tiles/modern-interiors/', import.meta.url).href;
+    this.load.spritesheet('oven', base + 'oven.png', { frameWidth: 16, frameHeight: 32 });
+    this.load.spritesheet('kitchen-sink', base + 'kitchen-sink.png', { frameWidth: 32, frameHeight: 16 });
+    for (const name of ['toilet', 'bathroom-sink', 'wardrobe', 'register', 'table4', 'table8']) {
+      this.load.image(name, base + name + '.png');
+    }
+    for (const name of ['kitchen', 'bathroom', 'entrance']) {
+      this.load.image(name + '-floor', base + name + '-floor.png');
+    }
   }
 
   create() {
     state.scene = this;
     this.graphics = this.add.graphics();
+    for (const [key, end, frameRate] of [['oven', 5, 2], ['kitchen-sink', 2, 10]]) {
+      if (!this.textures.exists(key)) continue;
+      this.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
+      this.anims.create({ key, frames: this.anims.generateFrameNumbers(key, { start: 0, end }), frameRate, repeat: -1 });
+    }
+    for (const key of ['toilet', 'bathroom-sink', 'wardrobe', 'register', 'table4', 'table8', 'kitchen-floor', 'bathroom-floor', 'entrance-floor']) {
+      if (this.textures.exists(key)) this.textures.get(key).setFilter(Phaser.Textures.FilterMode.NEAREST);
+    }
     this.input.on('pointerdown', (pointer) => this.handlePointerDown(pointer));
     this.input.on('pointermove', (pointer) => this.handlePointerMove(pointer));
     this.input.on('pointerup', () => this.handlePointerUp());
@@ -182,6 +208,9 @@ class RestaurantScene extends (window.Phaser?.Scene ?? Object) {
   redraw() {
     if (!this.graphics) return;
     this.graphics.clear();
+    this.visibleFurniture.clear();
+    this.visibleFloors.clear();
+    this.visibleTables.clear();
     this.labels.forEach((label) => label.destroy());
     this.labels = [];
 
@@ -191,8 +220,7 @@ class RestaurantScene extends (window.Phaser?.Scene ?? Object) {
     const height = level.grid.height;
     const g = this.graphics;
 
-    g.fillStyle(0xfffdf7, 1).fillRect(BOARD_X, BOARD_Y, width * CELL_SIZE, height * CELL_SIZE);
-    g.lineStyle(1, 0xe6e3d8, 1);
+    g.lineStyle(1, 0x756e60, .3);
     for (let x = 0; x <= width; x++) {
       const lineX = BOARD_X + x * CELL_SIZE;
       g.lineBetween(lineX, BOARD_Y, lineX, BOARD_Y + height * CELL_SIZE);
@@ -203,12 +231,27 @@ class RestaurantScene extends (window.Phaser?.Scene ?? Object) {
     }
 
     for (const room of state.rooms) this.drawRoom(room);
+    for (const [key, floor] of this.floors) {
+      if (this.visibleFloors.has(key)) continue;
+      floor.destroy();
+      this.floors.delete(key);
+    }
+    for (const [key, sprite] of this.furniture) {
+      if (this.visibleFurniture.has(key)) continue;
+      sprite.destroy();
+      this.furniture.delete(key);
+    }
     for (const table of state.tables) this.drawTable(table);
     if (state.drawing) this.drawRoomPreview(state.drawing);
     if ((state.activeTool === 'table8' || state.activeTool === 'table4') && state.hoverCell && state.mode === 'playing') {
       this.drawTablePreview(state.activeTool, state.hoverCell);
     }
     this.drawBoardBorder(width, height);
+    for (const [key, sprite] of this.tableSprites) {
+      if (this.visibleTables.has(key)) continue;
+      sprite.destroy();
+      this.tableSprites.delete(key);
+    }
   }
 
   drawRoom(room) {
@@ -218,21 +261,69 @@ class RestaurantScene extends (window.Phaser?.Scene ?? Object) {
     const y = BOARD_Y + room.y * CELL_SIZE + 2;
     const w = room.width * CELL_SIZE - 4;
     const h = room.height * CELL_SIZE - 4;
-    this.graphics.fillStyle(style.fill, .92).fillRoundedRect(x, y, w, h, 5);
+    this.drawFloor(room.id, room.type + '-floor', x, y, w, h, -1);
+    this.graphics.fillStyle(style.fill, .18).fillRoundedRect(x, y, w, h, 5);
     this.graphics.lineStyle(2, style.line, .95).strokeRoundedRect(x, y, w, h, 5);
-    const text = room.width * room.height <= 4 ? style.icon : t(room.type).toLocaleUpperCase(getLanguage());
-    const fontSize = Math.max(8, Math.min(11, Math.floor(Math.min(w, h) / (text.length > 3 ? 5.5 : 2.2))));
-    this.addLabel(text, x + w / 2, y + h / 2, fontSize, '#473f36', Math.max(18, w - 5));
+    this.drawRoomFurniture(room, x, y, w, h);
   }
 
-  drawTable(table) {
-    const x = BOARD_X + table.x * CELL_SIZE + 4;
-    const y = BOARD_Y + table.y * CELL_SIZE + 4;
-    const w = table.width * CELL_SIZE - 8;
-    const h = table.height * CELL_SIZE - 8;
-    this.graphics.fillStyle(table.type === 'table8' ? 0xf4d16e : 0xf8df91, 1).fillRoundedRect(x, y, w, h, 7);
-    this.graphics.lineStyle(2, 0xa8752d, 1).strokeRoundedRect(x, y, w, h, 7);
-    this.addLabel(table.seats, x + w / 2, y + h / 2, 15, '#6e4d20', w - 4);
+  drawFloor(key, texture, x, y, width, height, depth) {
+    if (!this.textures.exists(texture)) return;
+    this.visibleFloors.add(key);
+    let floor = this.floors.get(key);
+    if (!floor) {
+      floor = this.add.tileSprite(x, y, width, height, texture)
+        .setOrigin(0).setDepth(depth).setTileScale(CELL_SIZE / 16);
+      this.floors.set(key, floor);
+    }
+    floor.setPosition(x, y).setSize(width, height);
+  }
+
+  drawRoomFurniture(room, x, y, width, height) {
+    const horizontal = width >= height;
+    const fixtures = room.type === 'kitchen' ? ['kitchen-sink', 'oven']
+      : room.type === 'entrance' ? ['wardrobe', 'register', 'wardrobe'] : ['bathroom-sink', 'toilet'];
+    fixtures.forEach((texture, index) => {
+      if (!this.textures.exists(texture)) return;
+      const key = `${room.id}:${index}`;
+      this.visibleFurniture.add(key);
+      let sprite = this.furniture.get(key);
+      if (!sprite) {
+        sprite = this.add.sprite(0, 0, texture).setDepth(1);
+        this.furniture.set(key, sprite);
+        if (this.anims.exists(texture)) sprite.play(texture);
+      }
+      const fraction = .2 + index * .6 / (fixtures.length - 1);
+      sprite.setPosition(
+        x + width * (horizontal ? fraction : .5),
+        y + height * (horizontal ? .5 : fraction)
+      );
+      const slotSize = .8 / fixtures.length;
+      const maxWidth = Math.min(72, width * (horizontal ? slotSize : .8));
+      const maxHeight = Math.min(72, height * (horizontal ? .8 : slotSize));
+      sprite.setScale(Math.min(maxWidth / sprite.width, maxHeight / sprite.height));
+    });
+  }
+  drawTable(table, preview = false) {
+    if (!this.textures.exists(table.type)) return;
+    const key = preview ? 'preview' : table.id;
+    this.visibleTables.add(key);
+    let sprite = this.tableSprites.get(key);
+    if (!sprite) {
+      sprite = this.add.image(0, 0, table.type).setDepth(1);
+      this.tableSprites.set(key, sprite);
+    }
+    sprite.setTexture(table.type);
+    const horizontal = table.type === 'table8' && table.width > table.height;
+    const width = table.width * CELL_SIZE - 4;
+    const height = table.height * CELL_SIZE - 4;
+    sprite.setRotation(horizontal ? Math.PI / 2 : 0);
+    sprite.setDisplaySize(horizontal ? height : width, horizontal ? width : height);
+    sprite.setPosition(
+      BOARD_X + (table.x + table.width / 2) * CELL_SIZE,
+      BOARD_Y + (table.y + table.height / 2) * CELL_SIZE
+    );
+    sprite.setAlpha(preview ? .5 : 1);
   }
 
   drawRoomPreview(drawing) {
@@ -253,13 +344,7 @@ class RestaurantScene extends (window.Phaser?.Scene ?? Object) {
 
   drawTablePreview(type, cell) {
     const size = getTableSize(type);
-    const x = BOARD_X + cell.x * CELL_SIZE + 4;
-    const y = BOARD_Y + cell.y * CELL_SIZE + 4;
-    const w = size.width * CELL_SIZE - 8;
-    const h = size.height * CELL_SIZE - 8;
-    this.graphics.fillStyle(0xf4d16e, .48).fillRoundedRect(x, y, w, h, 7);
-    this.graphics.lineStyle(2, 0xa8752d, .8).strokeRoundedRect(x, y, w, h, 7);
-    this.addLabel(type === 'table8' ? '8' : '4', x + w / 2, y + h / 2, 14, '#6e4d20', w - 3);
+    this.drawTable({ type, ...cell, ...size }, true);
   }
 
   drawBoardBorder(width, height) {
@@ -275,7 +360,7 @@ class RestaurantScene extends (window.Phaser?.Scene ?? Object) {
       align: 'center',
       lineSpacing: -2,
       wordWrap: { width: wrapWidth, useAdvancedWrap: true }
-    }).setOrigin(.5);
+    }).setOrigin(.5).setDepth(2);
     this.labels.push(label);
   }
 }
