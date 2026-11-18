@@ -9,7 +9,7 @@
         "fr": {"title": "La première pizzeria", "description": "Aménagez les pièces et trouvez de la place pour tous les clients."}
       },
       "grid": { "width": 15, "height": 15, "metersPerCell": 1 },
-      "timeLimitSeconds": 60,
+      "timeLimitSeconds": 180,
       "showArea": true,
       "rooms": [
         { "type": "kitchen", "label": "Cozinha", "count": 1, "areaM2": 45, "width": 9, "height": 5 },
@@ -32,7 +32,7 @@
         "fr": {"title": "Un espace plus compact", "description": "Dessinez un nouveau plan avec moins de toilettes et une autre répartition des tables."}
       },
       "grid": { "width": 15, "height": 15, "metersPerCell": 1 },
-      "timeLimitSeconds": 60,
+      "timeLimitSeconds": 180,
       "showArea": true,
       "rooms": [
         { "type": "kitchen", "label": "Cozinha", "count": 1, "areaM2": 45, "width": 9, "height": 5 },
@@ -55,7 +55,7 @@
         "fr": {"title": "Plus de toilettes, plus de défis", "description": "Aménagez trois blocs de toilettes tout en gardant de la place pour les tables."}
       },
       "grid": { "width": 15, "height": 15, "metersPerCell": 1 },
-      "timeLimitSeconds": 60,
+      "timeLimitSeconds": 180,
       "showArea": true,
       "rooms": [
         { "type": "kitchen", "label": "Cozinha", "count": 1, "areaM2": 45, "width": 9, "height": 5 },

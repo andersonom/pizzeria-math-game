@@ -97,6 +97,11 @@ button:focus-visible, select:focus-visible, a:focus-visible {
 .board-column { min-width: 0; }
 .board-heading { display: flex; justify-content: space-between; align-items: center; min-height: 48px; margin: 0 2px 9px; }
 .board-heading h2 { font-size: 20px; }
+.board-actions { display: flex; align-items: center; gap: 7px; }
+.submit-button { min-height: 36px; padding: 8px 12px; border: 0; border-radius: 10px; color: #fff; background: var(--green); box-shadow: 0 3px 0 var(--green-dark); font-size: 11px; font-weight: 900; cursor: pointer; }
+.submit-button:hover:not(:disabled) { filter: brightness(1.06); }
+.submit-button:active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
+.submit-button:disabled { color: #aeb5a9; background: #e8ebe5; box-shadow: none; cursor: default; }
 .icon-button { width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 11px; color: #62715c; background: var(--panel); font-size: 23px; line-height: 1; cursor: pointer; }
 .icon-button:hover { background: #eff5eb; }
 .board-stage { position: relative; width: 100%; overflow: hidden; aspect-ratio: 1; border: 1px solid #dedccf; border-radius: 18px; background: #fffdf7; box-shadow: var(--shadow); }

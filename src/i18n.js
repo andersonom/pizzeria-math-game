@@ -23,6 +23,7 @@ const messages = {
   "ready": ["DESAFIO PRONTO", "READY TO PLAY", "DÉFI PRÊT"],
   "prepare": ["Prepare o restaurante", "Set up the restaurant", "Aménagez le restaurant"],
   "start": ["Começar fase", "Start level", "Commencer"],
+  "submit": ["Enviar solução", "Submit solution", "Envoyer la solution"],
   "complete": ["FASE CONCLUÍDA", "LEVEL COMPLETE", "NIVEAU TERMINÉ"],
   "result": ["Resultado", "Results", "Résultat"],
   "retry": ["Tentar de novo", "Try again", "Réessayer"],

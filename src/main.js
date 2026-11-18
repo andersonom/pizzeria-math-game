@@ -43,6 +43,7 @@ const dom = {
   resultChecklist: document.querySelector('#result-checklist'),
   stars: document.querySelector('#stars'),
   nextButton: document.querySelector('#next-button'),
+  submitButton: document.querySelector('#submit-button'),
   rotateButton: document.querySelector('#rotate-button'),
   toolHint: document.querySelector('#tool-hint'),
   boardSizeLabel: document.querySelector('#board-size-label'),
@@ -456,6 +457,7 @@ function updateTimerDisplay() {
   dom.timer.textContent = formatTime(state.remainingMs);
   dom.timerCard.classList.toggle('is-urgent', state.mode === 'playing' && state.remainingMs <= 10_000);
   dom.levelSelect.disabled = state.mode === 'playing';
+  dom.submitButton.disabled = state.mode !== 'playing';
 }
 
 function startLevel() {
@@ -660,6 +662,7 @@ function connectControls() {
   dom.rotateButton.addEventListener('click', toggleTableRotation);
   document.querySelector('#start-button').addEventListener('click', startLevel);
   document.querySelector('#restart-button').addEventListener('click', resetLevel);
+  dom.submitButton.addEventListener('click', finishLevel);
   document.querySelector('#retry-button').addEventListener('click', resetLevel);
   dom.nextButton.addEventListener('click', () => selectLevel((state.levelIndex + 1) % state.levels.length));
   dom.levelSelect.addEventListener('change', (event) => selectLevel(event.target.value));
