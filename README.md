@@ -1,6 +1,6 @@
 # De Pizza — Floor Plan Challenge
 
-A 2D browser game prototype built with Phaser and JavaScript. Levels are defined in `data/levels.json`, and the validator uses each level's parameters.
+A 2D browser game prototype built with Phaser and JavaScript. Levels are randomly generated, and game settings are defined in `data/config.json`.
 
 ## Run locally
 
@@ -24,4 +24,4 @@ Then open `http://localhost:8000` in your browser. Phaser is loaded from a CDN, 
 
 ## Future levels
 
-You can edit the parameters or add levels in `data/levels.json`. Random level generation is planned for a later stage.
+You can edit the default time limit and area display setting in `data/config.json`.

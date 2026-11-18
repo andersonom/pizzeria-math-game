@@ -1,14 +1,16 @@
 import { getLanguage, setLanguage, t, translatePage } from './i18n.js';
+import { generateRandomLevel } from './random-level.js';
 
-const LEVELS_URL = new URL('../data/levels.json', import.meta.url);
+const CONFIG_URL = new URL('../data/config.json', import.meta.url);
 const CANVAS_SIZE = 720;
 const CELL_SIZE = 42;
 const BOARD_X = (CANVAS_SIZE - CELL_SIZE * 15) / 2;
 const BOARD_Y = BOARD_X;
 
 const state = {
-  levels: [],
-  levelIndex: 0,
+  level: null,
+  phaseNumber: 1,
+  history: [],
   mode: 'loading',
   loadError: null,
   remainingMs: 60_000,
@@ -26,10 +28,8 @@ const state = {
 const dom = {
   languagePicker: document.querySelector('.language-picker'),
   measurementToggle: document.querySelector('#measurement-toggle'),
-  levelSelect: document.querySelector('#level-select'),
   timer: document.querySelector('#timer'),
   timerCard: document.querySelector('.timer-card'),
-  phaseKicker: document.querySelector('#phase-kicker'),
   phaseTitle: document.querySelector('#phase-title'),
   missionTitle: document.querySelector('#mission-title'),
   missionDescription: document.querySelector('#mission-description'),
@@ -41,6 +41,8 @@ const dom = {
   resultTitle: document.querySelector('#result-title'),
   resultSummary: document.querySelector('#result-summary'),
   resultChecklist: document.querySelector('#result-checklist'),
+  historyPanel: document.querySelector('#history-panel'),
+  historyList: document.querySelector('#history-list'),
   stars: document.querySelector('#stars'),
   nextButton: document.querySelector('#next-button'),
   submitButton: document.querySelector('#submit-button'),
@@ -366,7 +368,7 @@ class RestaurantScene extends (window.Phaser?.Scene ?? Object) {
 }
 
 function currentLevel() {
-  return state.levels[state.levelIndex] ?? null;
+  return state.level;
 }
 
 function createId() {
@@ -458,23 +460,7 @@ function updateToolUI() {
   dom.toolHint.textContent = t(`${state.activeTool}Hint`);
 }
 
-function levelText(level, field) {
-  return level.translations?.[getLanguage()]?.[field] ?? level[field];
-}
-
-function populateLevelSelect() {
-  dom.levelSelect.replaceChildren();
-  state.levels.forEach((level, index) => {
-    const option = document.createElement('option');
-    option.value = String(index);
-    option.textContent = `${t('level')} ${index + 1} · ${levelText(level, 'title')}`;
-    dom.levelSelect.append(option);
-  });
-  dom.levelSelect.value = String(state.levelIndex);
-}
-
-function selectLevel(index) {
-  state.levelIndex = Number(index);
+function resetLevel() {
   state.rooms = [];
   state.tables = [];
   state.remainingMs = (currentLevel()?.timeLimitSeconds ?? 60) * 1000;
@@ -488,7 +474,6 @@ function selectLevel(index) {
   dom.measurementToggle.checked = state.showArea;
   dom.startOverlay.hidden = false;
   dom.resultOverlay.hidden = true;
-  dom.levelSelect.value = String(index);
   updatePhaseDetails();
   updateTimerDisplay();
   updateToolUI();
@@ -498,11 +483,9 @@ function selectLevel(index) {
 function updatePhaseDetails() {
   const level = currentLevel();
   if (!level) return;
-  const stageNumber = state.levelIndex + 1;
-  dom.phaseKicker.textContent = `${t('level').toLocaleUpperCase(getLanguage())} ${stageNumber}`;
-  dom.phaseTitle.textContent = levelText(level, 'title');
-  dom.missionTitle.textContent = levelText(level, 'title');
-  dom.missionDescription.textContent = levelText(level, 'description');
+  dom.phaseTitle.textContent = `${t('level')} ${state.phaseNumber}`;
+  dom.missionTitle.textContent = t('rules');
+  dom.missionDescription.textContent = t('randomDescription');
   dom.boardSizeLabel.textContent = t('gridSize', level.grid);
   document.querySelector('#game').setAttribute('aria-label', t('gridLabel', level.grid));
   document.querySelector('#start-description').textContent = t('startDescription', { seconds: level.timeLimitSeconds });
@@ -528,7 +511,6 @@ function updatePhaseDetails() {
 
   dom.tableRules.replaceChildren();
   dom.seatTarget.textContent = t('seats', { count: level.targetSeats });
-  dom.nextButton.hidden = state.levelIndex >= state.levels.length - 1;
 }
 
 function formatTime(milliseconds) {
@@ -541,7 +523,6 @@ function formatTime(milliseconds) {
 function updateTimerDisplay() {
   dom.timer.textContent = formatTime(state.remainingMs);
   dom.timerCard.classList.toggle('is-urgent', state.mode === 'playing' && state.remainingMs <= 10_000);
-  dom.levelSelect.disabled = state.mode === 'playing';
   dom.submitButton.disabled = state.mode !== 'playing';
 }
 
@@ -554,8 +535,10 @@ function startLevel() {
   state.scene?.redraw();
 }
 
-function resetLevel() {
-  selectLevel(state.levelIndex);
+function nextLevel() {
+  state.level = generateRandomLevel(currentLevel());
+  state.phaseNumber += 1;
+  resetLevel();
 }
 
 function finishLevel() {
@@ -563,6 +546,7 @@ function finishLevel() {
   state.remainingMs = 0;
   state.mode = 'result';
   const result = validateCurrentLevel();
+  recordResult(result.stars);
   showResult(result);
   updateTimerDisplay();
   state.scene?.redraw();
@@ -645,6 +629,40 @@ function validateCurrentLevel() {
   };
 }
 
+function recordResult(stars) {
+  const previous = state.history.find((entry) => entry.phaseNumber === state.phaseNumber);
+  if (previous) {
+    previous.stars = Math.max(previous.stars, stars);
+  } else {
+    state.history.push({ phaseNumber: state.phaseNumber, stars });
+    state.history = state.history.slice(-10);
+  }
+  renderHistory();
+}
+
+function renderHistory() {
+  dom.historyPanel.hidden = state.history.length === 0;
+  dom.historyList.replaceChildren();
+  for (const entry of [...state.history].reverse()) {
+    const item = document.createElement('li');
+    const label = document.createElement('span');
+    label.textContent = `${t('level')} ${entry.phaseNumber}`;
+    const score = document.createElement('span');
+    score.className = 'history-stars';
+    score.setAttribute('role', 'img');
+    score.setAttribute('aria-label', t('stars', { count: entry.stars }));
+    for (let index = 0; index < 3; index++) {
+      const star = document.createElement('span');
+      star.textContent = '★';
+      star.setAttribute('aria-hidden', 'true');
+      if (index >= entry.stars) star.className = 'empty-star';
+      score.append(star);
+    }
+    item.append(label, score);
+    dom.historyList.append(item);
+  }
+}
+
 function showResult(result) {
   dom.resultTitle.textContent = result.stars === 3 ? t('allStars') : result.stars > 0 ? t('someStars') : t('zeroStars');
   dom.resultSummary.textContent = result.stars === 3
@@ -674,7 +692,6 @@ function showResult(result) {
     item.append(symbol, text);
     dom.resultChecklist.append(item);
   });
-  dom.nextButton.hidden = state.levelIndex >= state.levels.length - 1;
   dom.resultOverlay.hidden = false;
 }
 
@@ -732,6 +749,8 @@ function renderGameToText() {
     language: getLanguage(),
     coordinateSystem: 'Cells are zero-based; x increases right, y increases down; room/table sizes are in 1m cells.',
     level: level.id,
+    phaseNumber: state.phaseNumber,
+    history: state.history,
     timerSeconds: Math.ceil(state.remainingMs / 1000),
     selectedTool: state.activeTool,
     grid: level.grid,
@@ -749,8 +768,7 @@ function connectControls() {
   document.querySelector('#restart-button').addEventListener('click', resetLevel);
   dom.submitButton.addEventListener('click', finishLevel);
   document.querySelector('#retry-button').addEventListener('click', resetLevel);
-  dom.nextButton.addEventListener('click', () => selectLevel((state.levelIndex + 1) % state.levels.length));
-  dom.levelSelect.addEventListener('change', (event) => selectLevel(event.target.value));
+  dom.nextButton.addEventListener('click', nextLevel);
   dom.measurementToggle.addEventListener('change', () => {
     state.showArea = dom.measurementToggle.checked;
     state.scene?.redraw();
@@ -764,7 +782,7 @@ function refreshLanguage() {
     button.setAttribute('aria-pressed', String(selected));
   });
   translatePage();
-  populateLevelSelect();
+  renderHistory();
   updatePhaseDetails();
   updateToolUI();
   if (state.mode === 'result') showResult(validateCurrentLevel());
@@ -782,12 +800,12 @@ async function initialize() {
   refreshLanguage();
   try {
     if (!window.Phaser) throw new Error('phaserError');
-    const response = await fetch(LEVELS_URL);
+    const response = await fetch(CONFIG_URL);
     if (!response.ok) throw new Error('levelError');
     const data = await response.json();
-    if (!Array.isArray(data.levels) || data.levels.length === 0) throw new Error('invalidLevels');
-    state.levels = data.levels;
-    populateLevelSelect();
+    const settings = data.config;
+    if (!settings || typeof settings !== 'object' || Array.isArray(settings)) throw new Error('invalidLevels');
+    state.level = generateRandomLevel(settings);
     connectControls();
     state.game = new Phaser.Game({
       type: Phaser.AUTO,
@@ -804,7 +822,7 @@ async function initialize() {
       },
       render: { antialias: true, pixelArt: false, roundPixels: true }
     });
-    selectLevel(0);
+    resetLevel();
   } catch (error) {
     state.loadError = ['phaserError', 'invalidLevels'].includes(error.message) ? error.message : 'levelError';
     dom.loadError.textContent = t(state.loadError);

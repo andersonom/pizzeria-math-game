@@ -25,10 +25,6 @@
             <button type="button" class="language-button" data-language="en" aria-label="English" title="English">🇬🇧</button>
             <button type="button" class="language-button" data-language="fr" aria-label="Français" title="Français">🇫🇷</button>
           </div>
-          <label class="level-picker" for="level-select">
-            <span data-i18n="level">Fase</span>
-            <select id="level-select" aria-label="Escolher fase" data-i18n-aria-label="chooseLevel"></select>
-          </label>
           <div class="timer-card" aria-live="polite">
             <span class="timer-caption" data-i18n="time">TEMPO</span>
             <strong id="timer">01:00</strong>
@@ -97,7 +93,6 @@
         <section class="board-column" aria-label="Tabuleiro da pizzaria" data-i18n-aria-label="board">
           <div class="board-heading">
             <div>
-              <span id="phase-kicker" class="eyebrow">FASE 1</span>
               <h2 id="phase-title" data-i18n="loading">Carregando fase…</h2>
             </div>
             <div class="board-actions">
@@ -155,6 +150,10 @@
             <span class="note-icon" aria-hidden="true">ⓘ</span>
             <p id="spacing-note">Mantenha 2 m entre as mesas. Elas podem encostar nas paredes. As regras serão conferidas ao fim do tempo.</p>
           </div>
+          <section id="history-panel" class="rule-section history-panel" aria-labelledby="history-heading" hidden>
+            <h3 id="history-heading" class="tool-group-title" data-i18n="recentLevels">Últimas 10 fases · melhor pontuação</h3>
+            <ol id="history-list" class="history-list"></ol>
+          </section>
         </aside>
       </main>
 

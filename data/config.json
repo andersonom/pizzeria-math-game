@@ -1,0 +1,8 @@
+{
+  "config": {
+    "id": "fase-aleatoria",
+    "random": true,
+    "timeLimitSeconds": 180,
+    "showArea": true
+  }
+}
