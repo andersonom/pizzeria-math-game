@@ -436,21 +436,6 @@ function updatePhaseDetails() {
   });
 
   dom.tableRules.replaceChildren();
-  level.tables.forEach((table) => {
-    const item = document.createElement('li');
-    const icon = document.createElement('span');
-    icon.className = 'rule-icon';
-    icon.textContent = table.seats === 8 ? '▰' : '●';
-    const text = document.createElement('span');
-    const strong = document.createElement('strong');
-    strong.textContent = t('pieceCount', { count: table.count, label: ['table8', 'table4'].includes(table.type) ? t(table.type) : table.label });
-    const small = document.createElement('small');
-    const footprint = table.width * table.height;
-    small.textContent = t('tableSize', { seats: table.seats, area: footprint });
-    text.append(strong, small);
-    item.append(icon, text);
-    dom.tableRules.append(item);
-  });
   dom.seatTarget.textContent = t('seats', { count: level.targetSeats });
   dom.nextButton.hidden = state.levelIndex >= state.levels.length - 1;
 }
@@ -516,8 +501,7 @@ function validateCurrentLevel() {
   const diningAreaPass = actualDiningArea === expectedDiningArea;
   const roomsPass = roomBoundsPass && !roomCollisions && roomTargetsPass && noExtraRoomTypes && diningAreaPass;
 
-  const tableCountsPass = level.tables.every((target) => state.tables.filter((table) => table.type === target.type).length === target.count)
-    && state.tables.every((table) => level.tables.some((target) => target.type === table.type));
+  const tableCountsPass = state.tables.every((table) => level.tables.some((target) => target.type === table.type));
   const actualSeats = state.tables.reduce((sum, table) => sum + table.seats, 0);
   const seatTotalPass = actualSeats === level.targetSeats;
   const tableGeometryPass = state.tables.every((table) => {
