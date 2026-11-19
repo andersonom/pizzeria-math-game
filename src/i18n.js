@@ -38,6 +38,8 @@ const messages = {
   "time": ["TEMPO", "TIME", "TEMPS"],
   "level": ["Fase", "Level", "Niveau"],
   "undo": ["Desfazer", "Undo", "Annuler"],
+  "minimizeResult": ["Minimizar resultado", "Minimize result", "Réduire le résultat"],
+  "viewResult": ["Ver erros ({count})", "View errors ({count})", "Voir les erreurs ({count})"],
   "recentLevels": ["Últimas 10 fases", "Last 10 levels", "10 derniers niveaux"],
   "randomDescription": ["Calcule sua combinação de mesas e organize os cômodos. A próxima fase traz um novo desafio.", "Work out your table combination and arrange the rooms. The next level brings a new challenge.", "Calculez votre combinaison de tables et aménagez les pièces. Le niveau suivant propose un nouveau défi."],
   "home": ["De Pizza — início", "De Pizza home", "Accueil de De Pizza"],
