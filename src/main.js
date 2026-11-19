@@ -42,6 +42,9 @@ const dom = {
   resultTitle: document.querySelector('#result-title'),
   resultSummary: document.querySelector('#result-summary'),
   resultChecklist: document.querySelector('#result-checklist'),
+  resultSummaryToggle: document.querySelector('#result-summary-toggle'),
+  minimizeResultButton: document.querySelector('#minimize-result-button'),
+  resultSummaryToggleLabel: document.querySelector('#result-summary-toggle-label'),
   historyPanel: document.querySelector('#history-panel'),
   historyList: document.querySelector('#history-list'),
   stars: document.querySelector('#stars'),
@@ -504,6 +507,7 @@ function resetLevel() {
   state.rooms = [];
   state.tables = [];
   state.undoStack = [];
+  setResultCollapsed(false);
   state.remainingMs = (currentLevel()?.timeLimitSeconds ?? 60) * 1000;
   state.mode = 'ready';
   state.activeTool = 'move';
@@ -587,6 +591,7 @@ function finishLevel() {
   if (state.mode !== 'playing') return;
   state.remainingMs = 0;
   state.mode = 'result';
+  setResultCollapsed(false);
   const result = validateCurrentLevel();
   recordResult(result.stars);
   showResult(result);
@@ -705,7 +710,19 @@ function renderHistory() {
   }
 }
 
+function setResultCollapsed(collapsed) {
+  dom.resultOverlay.classList.toggle('is-minimized', collapsed);
+  dom.resultSummaryToggle.setAttribute('aria-expanded', String(!collapsed));
+  dom.minimizeResultButton.setAttribute('aria-expanded', String(!collapsed));
+}
+
+function updateResultSummaryToggle(result) {
+  const failedChecks = result.checks.filter((check) => !check.pass).length;
+  dom.resultSummaryToggleLabel.textContent = t('viewResult', { count: failedChecks });
+}
+
 function showResult(result) {
+  updateResultSummaryToggle(result);
   dom.resultTitle.textContent = result.stars === 3 ? t('allStars') : result.stars > 0 ? t('someStars') : t('zeroStars');
   dom.resultSummary.textContent = result.stars === 3
     ? t('success')
@@ -808,6 +825,8 @@ function connectControls() {
   });
   dom.rotateButton.addEventListener('click', toggleTableRotation);
   document.querySelector('#start-button').addEventListener('click', startLevel);
+  dom.resultSummaryToggle.addEventListener('click', () => setResultCollapsed(false));
+  dom.minimizeResultButton.addEventListener('click', () => setResultCollapsed(true));
   document.querySelector('#restart-button').addEventListener('click', resetLevel);
   dom.submitButton.addEventListener('click', finishLevel);
   dom.undoButton.addEventListener('click', undoLastChange);

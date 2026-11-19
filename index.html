@@ -113,7 +113,11 @@
               </div>
             </div>
             <div id="result-overlay" class="board-overlay" hidden>
+              <button id="result-summary-toggle" class="result-summary-toggle" type="button" aria-expanded="true">
+                <span id="result-summary-toggle-label">Ver erros</span>
+              </button>
               <div class="overlay-card result-card">
+                <button id="minimize-result-button" class="result-collapse-button" type="button" title="Minimizar resultado" data-i18n-title="minimizeResult" aria-label="Minimizar resultado" aria-expanded="true">−</button>
                 <p class="eyebrow" data-i18n="complete">FASE CONCLUÍDA</p>
                 <h2 id="result-title" data-i18n="result">Resultado</h2>
                 <div id="stars" class="stars" aria-label="Estrelas recebidas"></div>
