@@ -21,7 +21,3 @@ Then open `http://localhost:8000` in your browser. Phaser is loaded from a CDN, 
 - Use **Move** to reposition a piece or **Remove** to delete one.
 - The 8-seat table can be rotated.
 - The timer starts when you click **Start Phase**; the floor plan is validated automatically after 60 seconds.
-
-## Future levels
-
-You can edit the default time limit and area display setting in `data/config.json`.
