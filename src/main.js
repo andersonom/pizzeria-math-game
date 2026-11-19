@@ -11,6 +11,7 @@ const state = {
   level: null,
   phaseNumber: 1,
   history: [],
+  undoStack: [],
   mode: 'loading',
   loadError: null,
   remainingMs: 60_000,
@@ -46,6 +47,7 @@ const dom = {
   stars: document.querySelector('#stars'),
   nextButton: document.querySelector('#next-button'),
   submitButton: document.querySelector('#submit-button'),
+  undoButton: document.querySelector('#undo-button'),
   rotateButton: document.querySelector('#rotate-button'),
   toolHint: document.querySelector('#tool-hint'),
   boardSizeLabel: document.querySelector('#board-size-label'),
@@ -140,7 +142,8 @@ class RestaurantScene extends (window.Phaser?.Scene ?? Object) {
         startX: target.object.x,
         startY: target.object.y,
         width: target.object.width,
-        height: target.object.height
+        height: target.object.height,
+        before: captureBoardState()
       };
       this.redraw();
       return;
@@ -153,7 +156,7 @@ class RestaurantScene extends (window.Phaser?.Scene ?? Object) {
     }
 
     if (roomColors[state.activeTool]) {
-      state.drawing = { type: state.activeTool, start: cell, end: cell };
+      state.drawing = { type: state.activeTool, start: cell, end: cell, before: captureBoardState() };
       this.redraw();
       return;
     }
@@ -192,17 +195,22 @@ class RestaurantScene extends (window.Phaser?.Scene ?? Object) {
   handlePointerUp() {
     if (state.drawing) {
       const rect = rectangleFromCells(state.drawing.start, state.drawing.end);
+      state.undoStack.push(state.drawing.before);
       state.rooms.push({
         id: createId(),
         type: state.drawing.type,
         ...rect
       });
       state.drawing = null;
+      updateUndoButton();
       this.redraw();
       return;
     }
     if (state.moving) {
+      const { object, startX, startY, before } = state.moving;
+      if (object.x !== startX || object.y !== startY) state.undoStack.push(before);
       state.moving = null;
+      updateUndoButton();
       this.redraw();
     }
   }
@@ -371,6 +379,34 @@ function currentLevel() {
   return state.level;
 }
 
+function captureBoardState() {
+  return {
+    rooms: state.rooms.map((room) => ({ ...room })),
+    tables: state.tables.map((table) => ({ ...table })),
+    rotatedLargeTable: state.rotatedLargeTable
+  };
+}
+
+function restoreBoardState(snapshot) {
+  state.rooms = snapshot.rooms.map((room) => ({ ...room }));
+  state.tables = snapshot.tables.map((table) => ({ ...table }));
+  state.rotatedLargeTable = snapshot.rotatedLargeTable;
+}
+
+function updateUndoButton() {
+  dom.undoButton.disabled = state.mode !== 'playing' || state.undoStack.length === 0;
+}
+
+function undoLastChange() {
+  if (state.mode !== 'playing' || state.undoStack.length === 0) return;
+  restoreBoardState(state.undoStack.pop());
+  state.drawing = null;
+  state.moving = null;
+  state.hoverCell = null;
+  updateUndoButton();
+  state.scene?.redraw();
+}
+
 function createId() {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
@@ -403,6 +439,7 @@ function getTableSize(type) {
 
 function addTableAt(type, cell) {
   const size = getTableSize(type);
+  state.undoStack.push(captureBoardState());
   state.tables.push({
     id: createId(),
     type,
@@ -433,10 +470,13 @@ function pointInsideRect(point, rect) {
 function eraseObjectAt(cell) {
   const target = findObjectAt(cell);
   if (!target) return;
+  state.undoStack.push(captureBoardState());
   target.collection.splice(target.index, 1);
+  updateUndoButton();
 }
 
 function toggleTableRotation() {
+  if (state.mode === 'playing') state.undoStack.push(captureBoardState());
   state.rotatedLargeTable = !state.rotatedLargeTable;
   updateToolUI();
   state.scene?.redraw();
@@ -463,6 +503,7 @@ function updateToolUI() {
 function resetLevel() {
   state.rooms = [];
   state.tables = [];
+  state.undoStack = [];
   state.remainingMs = (currentLevel()?.timeLimitSeconds ?? 60) * 1000;
   state.mode = 'ready';
   state.activeTool = 'move';
@@ -524,6 +565,7 @@ function updateTimerDisplay() {
   dom.timer.textContent = formatTime(state.remainingMs);
   dom.timerCard.classList.toggle('is-urgent', state.mode === 'playing' && state.remainingMs <= 10_000);
   dom.submitButton.disabled = state.mode !== 'playing';
+  updateUndoButton();
 }
 
 function startLevel() {
@@ -751,6 +793,7 @@ function renderGameToText() {
     level: level.id,
     phaseNumber: state.phaseNumber,
     history: state.history,
+    undoAvailable: state.undoStack.length > 0,
     timerSeconds: Math.ceil(state.remainingMs / 1000),
     selectedTool: state.activeTool,
     grid: level.grid,
@@ -767,6 +810,7 @@ function connectControls() {
   document.querySelector('#start-button').addEventListener('click', startLevel);
   document.querySelector('#restart-button').addEventListener('click', resetLevel);
   dom.submitButton.addEventListener('click', finishLevel);
+  dom.undoButton.addEventListener('click', undoLastChange);
   document.querySelector('#retry-button').addEventListener('click', resetLevel);
   dom.nextButton.addEventListener('click', nextLevel);
   dom.measurementToggle.addEventListener('change', () => {
