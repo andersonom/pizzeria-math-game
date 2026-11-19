@@ -37,7 +37,7 @@ const messages = {
   "footerStars": ["Até 3 estrelas por fase", "Up to 3 stars per level", "Jusqu’à 3 étoiles par niveau"],
   "time": ["TEMPO", "TIME", "TEMPS"],
   "level": ["Fase", "Level", "Niveau"],
-  "recentLevels": ["Últimas 10 fases · melhor pontuação", "Last 10 levels · best score", "10 derniers niveaux · meilleur score"],
+  "recentLevels": ["Últimas 10 fases", "Last 10 levels", "10 derniers niveaux"],
   "randomDescription": ["Calcule sua combinação de mesas e organize os cômodos. A próxima fase traz um novo desafio.", "Work out your table combination and arrange the rooms. The next level brings a new challenge.", "Calculez votre combinaison de tables et aménagez les pièces. Le niveau suivant propose un nouveau défi."],
   "home": ["De Pizza — início", "De Pizza home", "Accueil de De Pizza"],
   "chooseLevel": ["Escolher fase", "Choose level", "Choisir un niveau"],
